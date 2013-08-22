@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Switchboard Admin</title>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-8">
+          <div id="switchboard-admin" ng-app="SwitchboardAdmin">
+            <h2>Switchboard Admin</h2>
+            <div ng-controller="RewriteCtrl">
+              <table class="table table-bordered table-striped">
+                <colgroup>
+                  <col class="rule-type"/>
+                  <col class="rule-from"/>
+                  <col class="rule-to"/>
+                </colgroup>
+                <tbody>
+                  <tr>
+                    <th>Rule Type</th>
+                    <th>From</th>
+                    <th>To</th>
+                  </tr>
+                  <tr ng-repeat="rewrite in rewrites">
+                    <td>{{rewrite.rule_type}}</td>
+                    <td>{{rewrite.from}}</td>
+                    <td>{{rewrite.to}}</td>
+                  </tr>
+                </tbody>
+              </table> 
+              <form class="form-inline" ng-submit="addRewrite()">
+                <div class="form-group">
+                  <label class="sr-only" for="rewriteRuleTypeSelect">Rule Type</label>
+                  <select id="rewriteRuleTypeSelect" class="form-control" ng-model="rewriteMethod">
+                    <option value="r301">301 (Moved Permanently)</option>
+                    <option value="r302">302 (Found)</option>
+                    <option value="r303">303 (See Other)</option>
+                    <option value="r307">307 (Temporary Redirect)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="sr-only" for="rewriteFromField">From</label>
+                  <input type="text" class="form-control" id="rewriteFromField" ng-model="rewriteFrom" placeholder="From pattern">
+                </div>
+
+                <div class="form-group">
+                  <label class="sr-only" for="rewriteToField">To</label>
+                  <input type="text" class="form-control" ng-model="rewriteTo" placeholder="To">
+                </div>
+
+                <input class="btn btn-default" type="submit" value="Add Rule">
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular-resource.min.js"></script>
+    <script>
+
+      angular.module('SwitchboardAdmin', ['ngResource']);
+      function RewriteCtrl($scope, $resource) {
+        Rewrite = $resource('/admin/rewrites');
+
+        $scope.rewrites = Rewrite.query();
+        $scope.addRewrite = function() {
+          var rewrite = new Rewrite({
+            rule_type: $scope.rewriteMethod,
+            from: $scope.rewriteFrom,
+            to: $scope.rewriteTo
+          });
+          rewrite.$save();
+
+          $scope.rewrites.push(rewrite);
+          $scope.rewriteMethod = 'r301';
+          $scope.rewriteFrom   = '';
+          $scope.rewriteTo     = '';
+        };
+
+        $scope.rewriteMethod = 'r301'
+      }
+
+    </script>
+  </body>
+</html>

@@ -20,6 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "rack"
   spec.add_dependency "rack-rewrite"
+  spec.add_dependency "json"
 
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
