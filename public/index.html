@@ -3,6 +3,12 @@
   <head>
     <title>Switchboard Admin</title>
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      td.rule-actions {
+        text-align: center;
+        width: 8%;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
@@ -16,17 +22,22 @@
                   <col class="rule-type"/>
                   <col class="rule-from"/>
                   <col class="rule-to"/>
+                  <col class="rule-actions"/>
                 </colgroup>
                 <tbody>
                   <tr>
                     <th>Rule Type</th>
                     <th>From</th>
                     <th>To</th>
+                    <th></th>
                   </tr>
                   <tr ng-repeat="rewrite in rewrites">
                     <td>{{rewrite.rule_type}}</td>
                     <td>{{rewrite.from}}</td>
                     <td>{{rewrite.to}}</td>
+                    <td class="rule-actions">
+                      <a href="#" ng-click="deleteRule($index,rewrite)"><span class="glyphicon glyphicon-minus-sign"></span></a>
+                    </td>
                   </tr>
                 </tbody>
               </table> 
@@ -59,12 +70,14 @@
       </div>
     </div>
 
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <!--script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script-->
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular-resource.min.js"></script>
     <script>
 
-      angular.module('SwitchboardAdmin', ['ngResource']);
+      angular.
+        module('SwitchboardAdmin', ['ngResource']);
+
       function RewriteCtrl($scope, $resource) {
         Rewrite = $resource('/admin/rewrites');
 
@@ -81,9 +94,14 @@
           $scope.rewriteMethod = 'r301';
           $scope.rewriteFrom   = '';
           $scope.rewriteTo     = '';
-        };
+        }
 
-        $scope.rewriteMethod = 'r301'
+        $scope.rewriteMethod = 'r301';
+
+        $scope.deleteRule = function(index, rewrite) {
+          rewrite.$remove({"index": index});
+          $scope.rewrites.splice(index, 1);
+        }
       }
 
     </script>
