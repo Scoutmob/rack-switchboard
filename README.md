@@ -1,6 +1,8 @@
 # Rack::Switchboard
 
-TODO: Write a gem description
+Rack::Switchboard is a Rack middleware which loads rewrite rules from an external store so new rules can be added or removed without having to deploy code or restart the server.  Switchboard is developed to support different stores for the rewrite rules.  Currently, an memory store and a Redis store are provided.
+
+This gem also provides a small Rack app which provides an admin to manage rules.
 
 ## Installation
 
