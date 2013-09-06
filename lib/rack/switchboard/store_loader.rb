@@ -3,7 +3,7 @@ module Rack
     module StoreLoader
       protected
         def create_store(options = :memory)
-          config = options || :memory
+          config = options ? options.dup : :memory
           provider, config = if config.kind_of? Hash
             [ config.delete(:provider), config ]
           else
