@@ -8,7 +8,11 @@ module Rack
         LIST_NAME = 'rack_switchboard:rules'
 
         def initialize(options = {})
-          @redis = ::Redis.new(options)
+          @redis = if options[:redis]
+            options[:redis]
+          else
+            ::Redis.new(options)
+          end
         end
 
         def fetch_rules
