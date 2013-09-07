@@ -18,6 +18,8 @@ module Rack
         begin
           rewrite_result = create_rewrite.call(env)
           if rewrite_result != 404
+            # close exisiting response - necessary for Rack::Lock
+            result[2].close if result[2].respond_to? :close
             result = rewrite_result
           end
         rescue Exception => e
