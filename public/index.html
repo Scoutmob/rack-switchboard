@@ -79,7 +79,7 @@
         module('SwitchboardAdmin', ['ngResource']);
 
       function RewriteCtrl($scope, $resource) {
-        Rewrite = $resource('/admin/rewrites');
+        Rewrite = $resource('rewrites');
 
         $scope.rewrites = Rewrite.query();
         $scope.addRewrite = function() {
