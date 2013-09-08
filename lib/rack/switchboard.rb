@@ -16,11 +16,14 @@ module Rack
       result = @app.call(env)
       if result[0].to_i == 404
         begin
-          rewrite_result = create_rewrite.call(env)
-          if rewrite_result != 404
+          store = create_store(@options[:store])
+          rewrite_result = create_rewrite(store).call(env)
+          if rewrite_result[0] != 404
             # close exisiting response - necessary for Rack::Lock
             result[2].close if result[2].respond_to? :close
             result = rewrite_result
+          else
+            record_404_request(env, store)
           end
         rescue Exception => e
           process_error(e, env)
@@ -30,13 +33,18 @@ module Rack
     end
 
     protected
-      def create_rewrite
-        store = create_store(@options[:store])
+      def create_rewrite(store)
         Rack::Rewrite.new(Proc.new { |env| [404, {}, []] }) do
           instance_eval(&@config_block) if @config_block
           (store.fetch_rules || []).each do |rule|
             rules << rule
           end
+        end
+      end
+
+      def record_404_request(env, store)
+        if store.respond_to? :record_404
+          store.record_404(env['PATH_INFO'])
         end
       end
 

@@ -6,8 +6,9 @@ module Rack
     class Admin
       def initialize(options = {})
         @map = Rack::URLMap.new(
-          '/rewrites' => Rewrites.new(options),
-          '/'         => Rack::File.new(::File.join(::File.dirname(__FILE__), '..', '..', '..', 'public'))
+          '/rewrites'   => Rewrites.new(options),
+          '/not_founds' => NotFounds.new(options),
+          '/'           => Rack::File.new(::File.join(::File.dirname(__FILE__), '..', '..', '..', 'public'))
         )
       end
 
@@ -67,7 +68,7 @@ module Rack
 
             [ 201,
               {'Content-Type' => 'application/json'},
-              [JSON.dump(as_json(rule)), env.inspect]
+              [JSON.dump(as_json(rule))]
             ]
           end
 
@@ -128,6 +129,49 @@ module Rack
               }
             end
           end
+      end
+
+      class NotFounds
+        include StoreLoader
+
+        def initialize(options = {})
+          @store_options = options[:store]
+        end
+
+        def call(env)
+          store = create_store(@store_options)
+
+          unless store.respond_to? :record_404
+            [404, {'Content-Type' => 'text/plain'}, ['Not Found']]
+          end
+
+          if env['REQUEST_METHOD'] == 'GET'
+            list_not_founds(env, store)
+          elsif env['REQUEST_METHOD'] == 'DELETE'
+            delete_not_found(env, store)
+          else
+            [404, {'Content-Type' => 'text/plain'}, ['Not Found']]
+          end
+        end
+
+        protected
+          def list_not_founds(env, store)
+            [ 200,
+              {'Content-Type' => 'application/json'},
+              [JSON.dump(store.fetch_404s.inject([]) { |m,(k,v)| m << {path: k, hit_count: v} })]
+            ]
+          end
+
+          def delete_not_found(env, store)
+            req = Rack::Request.new(env)
+            store.delete_404(req.params['path'])
+
+            [ 200,
+              {'Content-Type' => 'application/json'},
+              ['OK']
+            ]
+          end
+
       end
 
     end
