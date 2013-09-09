@@ -6,6 +6,7 @@ module Rack
     module Store
       class Redis
         LIST_NAME = 'rack_switchboard:rules'
+        NOT_FOUND_LIST_NAME = 'rack_switchboard:404s'
 
         def initialize(options = {})
           @redis = if options[:redis]
@@ -34,6 +35,21 @@ module Rack
               @redis.rpush(LIST_NAME, JSON.dump(as_json(rule)))
             end
           end
+        end
+
+        def record_404(path_info)
+          @redis.multi do
+            @redis.zremrangebyrank(NOT_FOUND_LIST_NAME, 0, -50)
+            @redis.zincrby(NOT_FOUND_LIST_NAME, 1, path_info)
+          end
+        end
+
+        def delete_404(path_info)
+          @redis.zrem(NOT_FOUND_LIST_NAME, path_info)
+        end
+
+        def fetch_404s
+          @redis.zrange(NOT_FOUND_LIST_NAME, 0, -1, :with_scores => true)
         end
 
         protected
